@@ -9,6 +9,6 @@
 + 设置中的存储添加软驱
 + 设置中的系统启动选择软驱
 
-具体可参考[virtualbox怎么添加软驱并加载软盘启动镜像](!https://jingyan.baidu.com/article/fec7a1e53cdc645091b4e771.html)
+具体可参考[virtualbox怎么添加软驱并加载软盘启动镜像](https://jingyan.baidu.com/article/fec7a1e53cdc645091b4e771.html)
 
 至于VirtualBox如何使用和建立虚拟电脑，可自行百度。
