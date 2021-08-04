@@ -1,17 +1,17 @@
-#### Ò»¡¢Éú³É¾µÏñÎÄ¼þ
-µÚÒ»Ìì¸öÈËÀí½âÊÇ¸öÍ¦ÎÞÁÄµÄ¹ý³Ì£¬ËùÒÔÒ²¾ÍÃ»ÓÐÇÃÔ´Âë£¬Ö±½Ó½«helloos.nas¿½±´¹ýÀ´¡£
-Éú³É¾µÏñÖ´ÐÐ`asm.bat`¼´¿É¡£
+#### ä¸€ã€ç”Ÿæˆé•œåƒæ–‡ä»¶
+ç¬¬ä¸€å¤©ä¸ªäººç†è§£æ˜¯ä¸ªæŒºæ— èŠçš„è¿‡ç¨‹ï¼Œæ‰€ä»¥ä¹Ÿå°±æ²¡æœ‰æ•²æºç ï¼Œç›´æŽ¥å°†helloos.nasæ‹·è´è¿‡æ¥ã€‚
+ç”Ÿæˆé•œåƒæ‰§è¡Œ`asm.bat`å³å¯ã€‚
 
-#### ¶þ¡¢Ö´ÐÐ¾µÏñÎÄ¼þ
-Ô­ÎÄÖÐÖ´ÐÐ¾µÏñÎÄ¼þÊÇÊ¹ÓÃÒ»¸ö½Ð×ö`qemu`µÄÄ£ÄâÆ÷¡£
-ÎÒÃ»ÓÐÊ¹ÓÃÕâÖÖ·½Ê½£¬¶øÊÇÖ±½ÓÊ¹ÓÃVirtualBoxÀ´¼ÓÔØÖ´ÐÐhelloos.img
-+ ½¨Á¢Ò»¸öÐéÄâµçÄÔ
-+ ÉèÖÃÖÐµÄ´æ´¢Ìí¼ÓÈíÇý
-+ ÉèÖÃÖÐµÄÏµÍ³Æô¶¯Ñ¡ÔñÈíÇý
-+ Æô¶¯ÐéÄâµçÄÔ
+#### äºŒã€æ‰§è¡Œé•œåƒæ–‡ä»¶
+åŽŸæ–‡ä¸­æ‰§è¡Œé•œåƒæ–‡ä»¶æ˜¯ä½¿ç”¨ä¸€ä¸ªå«åš`qemu`çš„æ¨¡æ‹Ÿå™¨ã€‚
+æˆ‘æ²¡æœ‰ä½¿ç”¨è¿™ç§æ–¹å¼ï¼Œè€Œæ˜¯ç›´æŽ¥ä½¿ç”¨VirtualBoxæ¥åŠ è½½æ‰§è¡Œhelloos.img
++ å»ºç«‹ä¸€ä¸ªè™šæ‹Ÿç”µè„‘
++ è®¾ç½®ä¸­çš„å­˜å‚¨æ·»åŠ è½¯é©±
++ è®¾ç½®ä¸­çš„ç³»ç»Ÿå¯åŠ¨é€‰æ‹©è½¯é©±
++ å¯åŠ¨è™šæ‹Ÿç”µè„‘
 
 ![hello.png](./hello.png)
 
-¾ßÌå¿É²Î¿¼[virtualboxÔõÃ´Ìí¼ÓÈíÇý²¢¼ÓÔØÈíÅÌÆô¶¯¾µÏñ](https://jingyan.baidu.com/article/fec7a1e53cdc645091b4e771.html)
+å…·ä½“å¯å‚è€ƒ[virtualboxæ€Žä¹ˆæ·»åŠ è½¯é©±å¹¶åŠ è½½è½¯ç›˜å¯åŠ¨é•œåƒ](https://jingyan.baidu.com/article/fec7a1e53cdc645091b4e771.html)
 
-ÖÁÓÚVirtualBoxÈçºÎÊ¹ÓÃºÍ½¨Á¢ÐéÄâµçÄÔ£¬¿É×ÔÐÐ°Ù¶È¡£
+è‡³äºŽVirtualBoxå¦‚ä½•ä½¿ç”¨å’Œå»ºç«‹è™šæ‹Ÿç”µè„‘ï¼Œå¯è‡ªè¡Œç™¾åº¦ã€‚
