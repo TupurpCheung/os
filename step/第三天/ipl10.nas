@@ -8,7 +8,7 @@ CYLS	EQU	10	;	定义常量10，用于柱面计数
 
 	JMP	entry
 	DB	0x90
-	DB	"HELLOIPL"	;	启动区的内容，可以时任意的字符，8字节
+	DB	"HARIBOTE"	;	启动区的内容，可以时任意的字符，8字节
 	DW	512	;	每个扇区的(sector)的大小，必须为512字节
 	DB	1	;	簇(cluster)的大小，必须为1个扇区
 	DW	1	;	FAT的起始位置，一般从第一个扇区开始
@@ -23,7 +23,7 @@ CYLS	EQU	10	;	定义常量10，用于柱面计数
 	DD	2880	;	重写一次磁盘大小
 	DB	0,0,0X29	;	意义不明，固定
 	DD	0Xfffffff	;	可能是卷标号码
-	DB	"HELLO-OS   "	;	磁盘的名称，11字节
+	DB	"HARIBOTEOS "	;	磁盘的名称，11字节
 	DB	"FAT12   "	;	磁盘格式名称，8字节
 	RESB	18	;	先空出18字节
 	
@@ -40,7 +40,7 @@ entry:
 	MOV	DS,AX
 	
 ;读磁盘	
-	MOV AX,0x8200
+	MOV AX,0x0820
 	MOV ES,AX
 	MOV CH,0	;	柱面0
 	MOV DH,0	;	磁头0
