@@ -1,3 +1,4 @@
+#include <stdio.h>
 /*告诉c编译器，有个函数在别的文件里，记得自己找下*/
 void io_hlt(void);
 void io_cli(void);
@@ -51,6 +52,7 @@ void HariMain(void) {
 		0x24,0x7e,0x42,0x42,0x42,0xe7,0x00,0x00
 	};	
 	struct BOOTINFO *binfo = (struct BOOTINFO *) 0x0ff0;
+	char s[40];
 		//初始化调色板
 	init_palette();
 	//初始化屏幕
@@ -61,7 +63,10 @@ void HariMain(void) {
 	//打印两遍会有立体字的效果
 	putfonts8_asc(binfo->vram, binfo->scrnx, COL8_C6C6C6,31, 31, "Haribote OS.");
 	putfonts8_asc(binfo->vram, binfo->scrnx, COL8_FFFFFF,30, 30, "Haribote OS.");
-
+	
+		
+	sprintf(s,"scrnx = %d",binfo->scrnx);
+	putfonts8_asc(binfo->vram, binfo->scrnx, COL8_FFFFFF,50, 30,s);
 	
 	for (;;) {
 		io_hlt();
