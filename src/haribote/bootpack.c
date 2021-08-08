@@ -11,6 +11,12 @@ void init_palette(void);
 void set_palette(int start, int end, unsigned char *rgb);
 /**画矩形*/
 void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, int x1, int y1);
+//初始化屏幕
+void init_screen(char *vram,int xsize,int ysize);
+//显示8*16的字符
+void putfont8(char *vram, int xsize, int x, int y, char c, char *font);
+void putfonts8_asc(char *vram, int xsize, int x, int y, char c, unsigned char *s);	
+
 
 /**定义宏*/
 #define COL8_000000		0
@@ -30,33 +36,31 @@ void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, i
 #define COL8_008484		14
 #define COL8_848484		15
 
+//定义bootinfo信息结构体
+struct BOOTINFO {
+	char cyls,leds,vmode,reserve;
+	short scrnx,scrny;	//屏幕分辨率,注意类型不要写成Int,因为在asmhead.nas中定义时，像素的x和y长度只占两个字节，如果写成int就会变成四字节，对不上了。
+	char *vram;	//显存指针
+};
+
+
 void HariMain(void) {
-	char *vram;
-	int xsize, ysize;
-
+	//使用16个字节来表示字母A,比特位为1时，设置像素点颜色
+	static char font_A[16] = {
+		0x00,0x18,0x18,0x18,0x18,0x24,0x24,0x24,
+		0x24,0x7e,0x42,0x42,0x42,0xe7,0x00,0x00
+	};	
+	struct BOOTINFO *binfo = (struct BOOTINFO *) 0x0ff0;
+		//初始化调色板
 	init_palette();
-	//显存地址从0xa0000开始
-	vram = (char *) 0xa0000;
-	//VGA显示
-	xsize = 320;
-	ysize = 200;
-
-	boxfill8(vram, xsize, COL8_008484,  0,         0,          xsize -  1, ysize - 29);
-	boxfill8(vram, xsize, COL8_C6C6C6,  0,         ysize - 28, xsize -  1, ysize - 28);
-	boxfill8(vram, xsize, COL8_FFFFFF,  0,         ysize - 27, xsize -  1, ysize - 27);
-	boxfill8(vram, xsize, COL8_C6C6C6,  0,         ysize - 26, xsize -  1, ysize -  1);
-
-	boxfill8(vram, xsize, COL8_FFFFFF,  3,         ysize - 24, 59,         ysize - 24);
-	boxfill8(vram, xsize, COL8_FFFFFF,  2,         ysize - 24,  2,         ysize -  4);
-	boxfill8(vram, xsize, COL8_848484,  3,         ysize -  4, 59,         ysize -  4);
-	boxfill8(vram, xsize, COL8_848484, 59,         ysize - 23, 59,         ysize -  5);
-	boxfill8(vram, xsize, COL8_000000,  2,         ysize -  3, 59,         ysize -  3);
-	boxfill8(vram, xsize, COL8_000000, 60,         ysize - 24, 60,         ysize -  3);
-
-	boxfill8(vram, xsize, COL8_848484, xsize - 47, ysize - 24, xsize -  4, ysize - 24);
-	boxfill8(vram, xsize, COL8_848484, xsize - 47, ysize - 23, xsize - 47, ysize -  4);
-	boxfill8(vram, xsize, COL8_FFFFFF, xsize - 47, ysize -  3, xsize -  4, ysize -  3);
-	boxfill8(vram, xsize, COL8_FFFFFF, xsize -  3, ysize - 24, xsize -  3, ysize -  3);
+	//初始化屏幕
+	init_screen(binfo->vram, binfo->scrnx, binfo->scrny);
+	//打印A
+	putfont8(binfo->vram, binfo->scrnx, 10, 10, COL8_FFFFFF, font_A);
+	
+	//打印两遍会有立体字的效果
+	putfonts8_asc(binfo->vram, binfo->scrnx, COL8_C6C6C6,31, 31, "Haribote OS.");
+	putfonts8_asc(binfo->vram, binfo->scrnx, COL8_FFFFFF,30, 30, "Haribote OS.");
 
 	
 	for (;;) {
@@ -118,6 +122,26 @@ void set_palette(int start, int end, unsigned char *rgb)
 	return;
 }
 
+void init_screen(char *vram,int xsize,int ysize) {
+	boxfill8(vram, xsize, COL8_008484,  0,         0,          xsize -  1, ysize - 29);
+	boxfill8(vram, xsize, COL8_C6C6C6,  0,         ysize - 28, xsize -  1, ysize - 28);
+	boxfill8(vram, xsize, COL8_FFFFFF,  0,         ysize - 27, xsize -  1, ysize - 27);
+	boxfill8(vram, xsize, COL8_C6C6C6,  0,         ysize - 26, xsize -  1, ysize -  1);
+
+	boxfill8(vram, xsize, COL8_FFFFFF,  3,         ysize - 24, 59,         ysize - 24);
+	boxfill8(vram, xsize, COL8_FFFFFF,  2,         ysize - 24,  2,         ysize -  4);
+	boxfill8(vram, xsize, COL8_848484,  3,         ysize -  4, 59,         ysize -  4);
+	boxfill8(vram, xsize, COL8_848484, 59,         ysize - 23, 59,         ysize -  5);
+	boxfill8(vram, xsize, COL8_000000,  2,         ysize -  3, 59,         ysize -  3);
+	boxfill8(vram, xsize, COL8_000000, 60,         ysize - 24, 60,         ysize -  3);
+
+	boxfill8(vram, xsize, COL8_848484, xsize - 47, ysize - 24, xsize -  4, ysize - 24);
+	boxfill8(vram, xsize, COL8_848484, xsize - 47, ysize - 23, xsize - 47, ysize -  4);
+	boxfill8(vram, xsize, COL8_FFFFFF, xsize - 47, ysize -  3, xsize -  4, ysize -  3);
+	boxfill8(vram, xsize, COL8_FFFFFF, xsize -  3, ysize - 24, xsize -  3, ysize -  3);
+	
+}
+
 /**画矩形
 * 当前系统使用的分辨率是320*200的
 * 像素点在显存的位置为从左到右边，从上到下
@@ -134,3 +158,45 @@ void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, i
 	}
 	return;
 }
+
+
+/**
+*@param vram 显存地址
+*@param xsize 像素长度
+*@param x x轴起始点，左上角为[0,0]
+*@param y y轴起始点，左上角为[0,0]
+*@param c 颜色
+*@param 字符数组8*16位
+*/
+void putfont8(char *vram, int xsize, int x, int y, char c, char *font)
+{
+	int i;
+	char *p, d /* data */;
+	//共计需要16个字节
+	for (i = 0; i < 16; i++) {
+		//求每个字节的第一个位的指针
+		p = vram + (y + i) * xsize + x;
+		d = font[i];
+		if ((d & 0x80) != 0) { p[0] = c; }
+		if ((d & 0x40) != 0) { p[1] = c; }
+		if ((d & 0x20) != 0) { p[2] = c; }
+		if ((d & 0x10) != 0) { p[3] = c; }
+		if ((d & 0x08) != 0) { p[4] = c; }
+		if ((d & 0x04) != 0) { p[5] = c; }
+		if ((d & 0x02) != 0) { p[6] = c; }
+		if ((d & 0x01) != 0) { p[7] = c; }
+	}
+	return;
+}
+
+//显示ascii字符
+void putfonts8_asc(char *vram, int xsize, int x, int y, char c, unsigned char *s)
+{
+	extern char hankaku[4096];
+	for (; *s != 0x00; s++) {
+		putfont8(vram, xsize, x, y, c, hankaku + *s * 16);
+		x += 8;
+	}
+	return;
+}
+
