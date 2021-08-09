@@ -17,6 +17,11 @@ void init_screen(char *vram,int xsize,int ysize);
 //显示8*16的字符
 void putfont8(char *vram, int xsize, int x, int y, char c, char *font);
 void putfonts8_asc(char *vram, int xsize, int x, int y, char c, unsigned char *s);	
+//初始化鼠标图像
+void init_mouse_cursor8(char *mouse, char bc);
+//画块状的物体
+void putblock8_8(char *vram, int vxsize, int pxsize,
+	int pysize, int px0, int py0, char *buf, int bxsize);
 
 
 /**定义宏*/
@@ -52,7 +57,7 @@ void HariMain(void) {
 		0x24,0x7e,0x42,0x42,0x42,0xe7,0x00,0x00
 	};	
 	struct BOOTINFO *binfo = (struct BOOTINFO *) 0x0ff0;
-	char s[40];
+	char s[40], mcursor[256];
 		//初始化调色板
 	init_palette();
 	//初始化屏幕
@@ -64,9 +69,15 @@ void HariMain(void) {
 	putfonts8_asc(binfo->vram, binfo->scrnx, COL8_C6C6C6,31, 31, "Haribote OS.");
 	putfonts8_asc(binfo->vram, binfo->scrnx, COL8_FFFFFF,30, 30, "Haribote OS.");
 	
+	
+	//初始化鼠标
+	init_mouse_cursor8(mcursor, COL8_008484);
+	putblock8_8(binfo->vram, binfo->scrnx, 16, 16, 180, 30, mcursor, 16);	
 		
 	sprintf(s,"scrnx = %d",binfo->scrnx);
-	putfonts8_asc(binfo->vram, binfo->scrnx, COL8_FFFFFF,50, 30,s);
+	putfonts8_asc(binfo->vram, binfo->scrnx, COL8_FFFFFF,80, 30,s);
+	
+	
 	
 	for (;;) {
 		io_hlt();
@@ -205,3 +216,71 @@ void putfonts8_asc(char *vram, int xsize, int x, int y, char c, unsigned char *s
 	return;
 }
 
+
+
+/**
+*
+*@param bc 背景色
+*/
+void init_mouse_cursor8(char *mouse, char bc)
+/* 准备鼠标指针 */
+{
+	static char cursor[16][16] = {
+		"**************..",
+		"*OOOOOOOOOOO*...",
+		"*OOOOOOOOOO*....",
+		"*OOOOOOOOO*.....",
+		"*OOOOOOOO*......",
+		"*OOOOOOO*.......",
+		"*OOOOOOO*.......",
+		"*OOOOOOOO*......",
+		"*OOOO**OOO*.....",
+		"*OOO*..*OOO*....",
+		"*OO*....*OOO*...",
+		"*O*......*OOO*..",
+		"**........*OOO*.",
+		"*..........*OOO*",
+		"............*OO*",
+		".............***"
+	};
+	int x, y;
+
+//循环二维数组
+	for (y = 0; y < 16; y++) {
+		for (x = 0; x < 16; x++) {
+			//*显示为黑色
+			if (cursor[y][x] == '*') {
+				mouse[y * 16 + x] = COL8_000000;
+			}
+			//O显示为白色
+			if (cursor[y][x] == 'O') {
+				mouse[y * 16 + x] = COL8_FFFFFF;
+			}
+			//
+			if (cursor[y][x] == '.') {
+				mouse[y * 16 + x] = bc;
+			}
+		}
+	}
+	return;
+}
+
+/**
+*@param vram 显存位置
+*@param vxsize X轴像素数
+*@param pxsize pysize 要显示的块大小
+*@param px0,py0 要显示的块的起始位置
+*@param buf 要显示的块的存放地址
+*
+*/
+void putblock8_8(char *vram, int vxsize, int pxsize,
+	int pysize, int px0, int py0, char *buf, int bxsize)
+{
+	int x, y;
+	for (y = 0; y < pysize; y++) {
+		for (x = 0; x < pxsize; x++) {
+			vram[(py0 + y) * vxsize + (px0 + x)] = buf[y * bxsize + x];
+		}
+	}
+	return;
+}
