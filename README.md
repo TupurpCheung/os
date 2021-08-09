@@ -69,3 +69,13 @@
 + 关于调色板的问题，io_out8是向端口输出，而不是内存。VGA八位真彩模式的要求就是向0x03c8输入调色板序号，0x03c9输入序号对应的颜色
 + 由于VGA八位真彩模式的一个像素点只有八位，最多能表示256种颜色。但无法用于表示RGB颜色（需24位来表示）。所以使用了调色板，像素点存储调色板的序号（8位），序号
 对应的RGB位颜色则存储在调色板中。且每个序号对应的RGB颜色可以由程序员自己设定。
+
+
+
+#### 第五天
++ GDT（ global segment descriptor table）全局段号记录表
++ GDT被设置在了0x270000-0x277ffff内存地址上，共计64KB
++ 需要把GDT的起始位置（0x270000）和有效设定个数（即有多少个段是有效的）记录到CPU内部的特殊寄存器GDTR（global segment descriptor table register）中
++ IDT（interrupt descriptor table）中断记录表
++ IDT被设置在了0x26f800-0x26ffff内存地址上，即在GDT的前面，共2KB
+团      

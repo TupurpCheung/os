@@ -1,11 +1,14 @@
 #include <stdio.h>
-/*告诉c编译器，有个函数在别的文件里，记得自己找下*/
+/*告诉c编译器，有个函数在别的文件里，记得自己找下，这些都是汇编方法*/
 void io_hlt(void);
 void io_cli(void);
 void io_out8(int port, int data);
 int io_load_eflags(void);
 void io_store_eflags(int eflags);
+void load_gdtr(int limit, int addr);
+void load_idtr(int limit, int addr);
 
+//下面这些都是C语言的方法
 /**初始化调色板*/
 void init_palette(void);
 /**设置调色板*/
@@ -49,6 +52,24 @@ struct BOOTINFO {
 	char *vram;	//显存指针
 };
 
+//GDT
+struct SEGMENT_DESCRIPTOR {
+	short limit_low, base_low;
+	char base_mid, access_right;
+	char limit_high, base_high;
+};
+//IDT
+struct GATE_DESCRIPTOR {
+	short offset_low, selector;
+	char dw_count, access_right;
+	short offset_high;
+};
+
+void init_gdtidt(void);
+void set_segmdesc(struct SEGMENT_DESCRIPTOR *sd, unsigned int limit, int base, int ar);
+void set_gatedesc(struct GATE_DESCRIPTOR *gd, int offset, int selector, int ar);
+
+
 
 void HariMain(void) {
 	//使用16个字节来表示字母A,比特位为1时，设置像素点颜色
@@ -89,8 +110,7 @@ void HariMain(void) {
 初始化调色板，也就是系统中就只有这些颜色
 每三个字节为一组，每组表示一个颜色，共16组
 */
-void init_palette(void)
-{
+void init_palette(void) {
 	static unsigned char table_rgb[16 * 3] = {
 		0x00, 0x00, 0x00,	/*  0:黑 */
 		0xff, 0x00, 0x00,	/*  1:亮红 */
@@ -118,13 +138,11 @@ void init_palette(void)
 }
 
 //将调色板数据记录到内存中
-void set_palette(int start, int end, unsigned char *rgb)
-{
+void set_palette(int start, int end, unsigned char *rgb) {
 	int i, eflags;
 	eflags = io_load_eflags();	/* 先备份eflags的值 */
 	io_cli(); 					/* 设置不允许中断 */
 	//向端口0x03c8输入的为调色板序号
-	io_out8(0x03c8, start);
 	//接着向0x03c9输入颜色，如果还要接着输入下一序号的颜色，可以直接接着输入颜色，而不用输入序号
 	for (i = start; i <= end; i++) {
 		io_out8(0x03c9, rgb[0] / 4);
@@ -165,8 +183,7 @@ void init_screen(char *vram,int xsize,int ysize) {
 * x0,y0 为左上角
 * x1,y1 为右下角
 */
-void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, int x1, int y1)
-{
+void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, int x1, int y1) {
 	int x, y;
 	for (y = y0; y <= y1; y++) {
 		for (x = x0; x <= x1; x++)
@@ -184,8 +201,7 @@ void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, i
 *@param c 颜色
 *@param 字符数组8*16位
 */
-void putfont8(char *vram, int xsize, int x, int y, char c, char *font)
-{
+void putfont8(char *vram, int xsize, int x, int y, char c, char *font) {
 	int i;
 	char *p, d /* data */;
 	//共计需要16个字节
@@ -206,8 +222,7 @@ void putfont8(char *vram, int xsize, int x, int y, char c, char *font)
 }
 
 //显示ascii字符
-void putfonts8_asc(char *vram, int xsize, int x, int y, char c, unsigned char *s)
-{
+void putfonts8_asc(char *vram, int xsize, int x, int y, char c, unsigned char *s) {
 	extern char hankaku[4096];
 	for (; *s != 0x00; s++) {
 		putfont8(vram, xsize, x, y, c, hankaku + *s * 16);
@@ -222,9 +237,8 @@ void putfonts8_asc(char *vram, int xsize, int x, int y, char c, unsigned char *s
 *
 *@param bc 背景色
 */
-void init_mouse_cursor8(char *mouse, char bc)
+void init_mouse_cursor8(char *mouse, char bc) {
 /* 准备鼠标指针 */
-{
 	static char cursor[16][16] = {
 		"**************..",
 		"*OOOOOOOOOOO*...",
@@ -282,5 +296,59 @@ void putblock8_8(char *vram, int vxsize, int pxsize,
 			vram[(py0 + y) * vxsize + (px0 + x)] = buf[y * bxsize + x];
 		}
 	}
+	return;
+}
+
+void init_gdtidt(void)
+{
+	//gdt从内存的0x00270000开始
+	struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) 0x00270000;
+	//idt从内存的0x0026f8000开始
+	struct GATE_DESCRIPTOR    *idt = (struct GATE_DESCRIPTOR    *) 0x0026f800;
+	int i;
+
+	/* 初始化GDT */
+	for (i = 0; i < 8192; i++) {
+		//设置8192个段的默认初始值为0
+		set_segmdesc(gdt + i, 0, 0, 0);
+	}
+	//设置第一个段的对应的内存空间为4GB，即32位系统的上限
+	set_segmdesc(gdt + 1, 0xffffffff, 0x00000000, 0x4092);
+	//设置第二个段大小为512Kb,内存起始位置为0x00280000，存放的是bootpack.h
+	set_segmdesc(gdt + 2, 0x0007ffff, 0x00280000, 0x409a);
+	//
+	load_gdtr(0xffff, 0x00270000);
+
+	/* 初始化IDT */
+	for (i = 0; i < 256; i++) {
+		set_gatedesc(idt + i, 0, 0, 0);
+	}
+	load_idtr(0x7ff, 0x0026f800);
+
+	return;
+}
+
+void set_segmdesc(struct SEGMENT_DESCRIPTOR *sd, unsigned int limit, int base, int ar)
+{
+	if (limit > 0xfffff) {
+		ar |= 0x8000; /* G_bit = 1 */
+		limit /= 0x1000;
+	}
+	sd->limit_low    = limit & 0xffff;
+	sd->base_low     = base & 0xffff;
+	sd->base_mid     = (base >> 16) & 0xff;
+	sd->access_right = ar & 0xff;
+	sd->limit_high   = ((limit >> 16) & 0x0f) | ((ar >> 8) & 0xf0);
+	sd->base_high    = (base >> 24) & 0xff;
+	return;
+}
+
+void set_gatedesc(struct GATE_DESCRIPTOR *gd, int offset, int selector, int ar)
+{
+	gd->offset_low   = offset & 0xffff;
+	gd->selector     = selector;
+	gd->dw_count     = (ar >> 8) & 0xff;
+	gd->access_right = ar & 0xff;
+	gd->offset_high  = (offset >> 16) & 0xffff;
 	return;
 }
