@@ -61,7 +61,6 @@
 #### 2、内存寻址
 + 8086中最小的内存单元为1个字节。一个字（WORD）为2个字节，DB表示两个字，即4个字节32位
 + 任何2个地址连续的内存单元，N号单元和N+1单元，可以视作2个独立的内存单元，也可以看做1个地址为N的字单元，其中N为低位，N+1为高位
-+ DB（define byte）一个字节,DW（define word）一个字
 + 由于8086地址总线有20条，但寄存器只有16位，为了能使得寻址能力最大化，所以采取了物理地址 = 段地址*16+偏移地址的方式
 
 #### 3、栈
@@ -98,43 +97,3 @@ end start
 ```
 
 ##### 4.3、PUSH和POP
-
-
-#### 5、一个包含多个段的程序
-```
-;一个包含多个段的程序，把数据（data）段的字型数据依次入栈
-assume cs:code,ds:data,ss:stack	;	指定代码段，数据段，栈段
-
-data segment
-	dw 0123H,0456H,0789H,0abcH,0defH,0fedH,0cbaH,0987H
-data ends
-
-stack segment
-	dw 0,0,0,0,0,0,0,0,0,0
-stack ends
-
-code segment
-	start:mov ax:stack
-		mov ss,ax
-		mov sp,16	;	设置栈顶ss:sp指向stack:16，即栈底部的下一个高位
-		
-		mov ax,data
-		mov ds,as
-		mov bx,0	;	设置数据段地址
-		
-		mov cx,8
-	s0:push [bx]
-		add bx,2
-		loop s0	;	将data段0-15单元的8个字型数据依次入栈 
-		
-		mov bx,0
-		mov cx,8
-	s1:pop [bx]
-		add bx,2
-		loop s1	;	将stack段中的8个字型数据依次出栈到data段的0-15单元中
-		
-		mov ax,4c00h
-		int 21h
-code ends
-end start
-```
