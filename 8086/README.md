@@ -93,7 +93,7 @@ codesg segment
 			mov ax,4c00H
 			int 21H
 codesg ends	
-end			
+end start			
 ```
 
 ##### 4.3、PUSH和POP
