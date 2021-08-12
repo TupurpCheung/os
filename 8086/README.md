@@ -78,7 +78,7 @@
 
 ##### 4.2、LOOP
 + 从内存单元ffff:0006位置取一个单元的数据，乘以3，结果放在DX中
-```
+```asm
 assume cs:codesg
 
 codesg segment
@@ -101,7 +101,7 @@ end start
 
 
 #### 5、一个包含多个段的程序
-```
+```asm
 ;一个包含多个段的程序，把数据（data）段的字型数据依次入栈
 assume cs:code,ds:data,ss:stack	;	指定代码段，数据段，栈段
 
