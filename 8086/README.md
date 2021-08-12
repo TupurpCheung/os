@@ -29,13 +29,13 @@
 #### 1、寄存器
 ##### 1.1、通用（数据）寄存器
 + AX：累加器，一般是用于计算
-+ BX：基址寄存器，用来存放存储器地址
-+ CX：计数器，循环操作中常用
++ BX：基址寄存器，用来存放存储器偏移地址，和DS配合使用
++ CX：计数器，循环操作中常用，与LOOP指令配合使用
 + DX：数据寄存器
 
 ##### 1.2、段寄存器
 + CS：指令段，和IP配合找到下一条指令的位置
-+ DS：数据段
++ DS：数据段，和BX配合找到内存中的数据
 + ES：附加段，和DI配合用于串指令。
 + SS；堆栈段，和SP配合寻找栈顶
 
@@ -67,3 +67,24 @@
 ##### 3.1、MOV
 + MOV 寄存器 数据
 + MOV 寄存器 寄存器
+
+##### 3.2、LOOP
++ 从内存单元ffff:0006位置取一个单元的数据，乘以3，结果放在DX中
+```
+assume cs:codesg
+
+codesg segment
+	start:mov ax,0ffffh
+			mov ds,ax
+			mov bx,0006h,
+			mov al,[bx]
+			mov ah,0
+			mov dx,0
+			mov cx,3
+	  s:add dx,ax		
+			loop s
+			mov ax,4c00H
+			int 21H
+codesg ends	
+end			
+```
