@@ -119,7 +119,7 @@ code segment
 		mov sp,16	;	设置栈顶ss:sp指向stack:16，即栈底部的下一个高位
 		
 		mov ax,data
-		mov ds,as
+		mov ds,ax
 		mov bx,0	;	设置数据段地址
 		
 		mov cx,8
